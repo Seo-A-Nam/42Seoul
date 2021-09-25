@@ -1,10 +1,10 @@
-#include "libftprintf.h"
+#include "ft_printf.h"
 
 int     is_type(char c)
 {
     if (c == 'c' || c == 's' || c == 'p'
         || c == 'd' || c == 'i' || c == 'u'
-        || c == 'x' || c == 'X')
+        || c == 'x' || c == 'X' || c == '%')
         return (1);
     return (0);
 }
@@ -25,6 +25,8 @@ void    ft_handle_types(char type, va_list *ap, int *printed_char)
         print_hex_lower_num(ap, printed_char);
     if (type == 'X')
         print_hex_upper_num(ap, printed_char);
+    if (type == '%')
+        print_percent(ap, printed_char);
 }
 
 int     ft_handle_format(const char *input, va_list *ap, int *count)
