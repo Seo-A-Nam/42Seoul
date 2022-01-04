@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+int serverPid = 0;
+
 static void	write_nbr_fd(int n, int fd)
 {
 	char	c;
@@ -30,7 +32,7 @@ void		ft_putnbr_fd(int n, int fd)
 }
 // write()를 통해 정수를 출력
 
-void    handler(int signo)
+void    get_msg(int signo, siginfo_t *info, void *a)
 {
     static int bit = 0;
     static int msg_bit = 0;
@@ -48,22 +50,45 @@ void    handler(int signo)
     }
     if (bit == 8)
     {
+        serverPid = info->si_pid;
         bit = 0;
         unsigned char c = msg_bit;
         write(1, &c, 1);
     }
 }
 
-int     main()
+void    print_serverPid()
 {
-    signal(SIGUSR1, handler);
-    signal(SIGUSR2, handler);
-    // client pid 출력.
     write(1, "Server PID : ", 14);
     ft_putnbr_fd((int)getpid(), 1);
     write(1, "\n", 1);
-    // signal 입력 기다림.
+}
+
+void    wait_msg()
+{
     while (1)
+    {
         pause();
+        if (serverPid != 0)
+        {
+            kill(serverPid, SIGUSR1);
+            serverPid = 0;
+        }
+    }
+}
+
+int     main()
+{
+    struct sigaction sa;
+    // 특정 signal을 받았을 때 호출되는 함수(handler)를 지정함. 
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sa.sa_sigaction = get_msg;
+    sigaction(SIGUSR1, &sa, (struct sigaction *)NULL);
+    sigaction(SIGUSR2, &sa, (struct sigaction *)NULL);
+    // client pid 출력.
+    print_serverPid();
+    // signal 입력 기다림.
+    wait_msg();
     return (0);
 }
