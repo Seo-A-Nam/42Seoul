@@ -1,53 +1,99 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   server.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: namseoa <namseoa@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/01/04 22:11:40 by namseoa           #+#    #+#             */
+/*   Updated: 2022/01/05 12:30:41 by namseoa          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minitalk.h"
 
-void    get_msg(int signo, siginfo_t *info, void *a) // 시그널 핸들러.
+static int	kill_(int targetPID, int signo)
 {
-    static int bit = 0;
-    static int msg_bit = 0;
-
-    (void)a;
-    // 2배 곱하는 걸 곱셈 연산자가 아닌 비트연산으로. 비트연산이 곱셈연산과 속도면에서 50~100배 이상 차이 난다.
-    if (signo == SIGUSR1)
-    {
-        msg_bit = msg_bit<<1;
-        bit++;
-    }
-    if (signo == SIGUSR2)
-    {
-        msg_bit = (msg_bit<<1) + 1;
-        bit++;
-    }
-    if (bit == 8)
-    {
-        kill(info->si_pid, SIGUSR1); // 한 글자마다 수신 확인 시그널 보내줌
-        bit = 0;
-        unsigned char c = msg_bit;
-        write(1, &c, 1);
-    }
-} // 따로 호출해주지 않아도, signal이 들어오면 알아서 호출되는 함수 (시그널 핸들러)
-
-void    print_serverPid()
-{
-    write(1, "Server PID : ", 14);
-    ft_putnbr_fd((int)getpid(), 1);
-    write(1, "\n", 1);
+	if (kill(targetPID, signo) == -1)
+	{
+		if (errno == EPERM)
+		{
+			write(1, "[error] kill() : Not enough permission!\n", 41);
+		}
+		else if (errno == ESRCH)
+		{
+			write(1, "[error] kill() : Cannot find the process of pid [", 50);
+			ft_putnbr_fd(targetPID, 1);
+			write(1, "]\n", 3);
+		}
+		else if (errno == EINVAL)
+		{	
+			write(1, "[error] kill() : Invalid signo", 31);
+			ft_putnbr_fd(signo, 1);
+			write(1, "\n", 1);
+		}
+		else
+			write(1, "[error] kill()\n", 16);
+		return (-1);
+	}
+	return (0);
 }
 
-int     main()
+static void	get_msg(int signo, siginfo_t *info, void *a)
 {
-    struct sigaction sa;
-    // 특정 signal을 받았을 때 호출되는 함수(handler)를 지정함. 
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
-    sa.sa_sigaction = get_msg;
-    sigaction(SIGUSR1, &sa, (struct sigaction *)NULL);
-    sigaction(SIGUSR2, &sa, (struct sigaction *)NULL);
-    // client pid 출력.
-    print_serverPid();
-    // signal 입력 기다림.
-    while (1)
-    {
-        pause();
-    }
-    return (0);
+	static int		bit;
+	static int		msg_bit;
+	unsigned char	c;
+
+	(void)a;
+	if (signo == SIGUSR1)
+	{
+		msg_bit = (msg_bit << 1);
+		bit++;
+	}
+	if (signo == SIGUSR2)
+	{
+		msg_bit = (msg_bit << 1) + 1;
+		bit++;
+	}
+	if (bit == 8)
+	{
+		if (kill_(info->si_pid, SIGUSR1) == -1)
+			return ;
+		bit = 0;
+		c = msg_bit;
+		write(1, &c, 1);
+	}
+}
+
+static void	print_serverpid(void)
+{
+	write(1, "Server PID : ", 14);
+	ft_putnbr_fd((int)getpid(), 1);
+	write(1, "\n", 1);
+}
+
+int	main(void)
+{
+	struct sigaction	sa;
+
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_sigaction = get_msg;
+	if (sigaction(SIGUSR1, &sa, (struct sigaction *) NULL) == -1)
+	{
+		write(1, "[error] sigaction() : Failed to handle SIGUSR1 signal\n", 55);
+		return (0);
+	}
+	if (sigaction(SIGUSR2, &sa, (struct sigaction *) NULL) == -1)
+	{
+		write(1, "[error] sigaction() : Failed to handle SIGUSR2 signal\n", 55);
+		return (0);
+	}
+	print_serverpid();
+	while (1)
+	{
+		pause();
+	}
+	return (0);
 }

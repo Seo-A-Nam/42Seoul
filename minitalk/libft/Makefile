@@ -6,11 +6,12 @@
 #    By: namseoa <namseoa@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/05/24 13:21:01 by senam             #+#    #+#              #
-#    Updated: 2022/01/04 15:48:33 by namseoa          ###   ########.fr        #
+#    Updated: 2022/01/05 12:29:16 by namseoa          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 SRCS            =	ft_atoi.c ft_putnbr_fd.c ft_strlen.c \
+					ft_convert_textws.c ft_is_numstr.c ft_strdup.c \
 
 OBJS            = $(SRCS:.c=.o)
 

@@ -1,110 +1,115 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   client.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: namseoa <namseoa@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/01/05 11:02:47 by namseoa           #+#    #+#             */
+/*   Updated: 2022/01/05 12:42:16 by namseoa          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minitalk.h"
 
-int sig_ack = 0;
+int	g_sig_ack;
 
-void    ack(int signo)
+static int	kill_(int targetPID, int signo)
 {
-    (void)signo;
-    sig_ack++;
-} // 내가 한글자에 대한 시그널을 다 보냈을 때마다, 상대편에서 signal을 보내 sig_ack가 하나씩 늘어난다.
-
-void    recieve_check(int sig_total)
-{
-    if (sig_ack == sig_total) // 보낸 총 글자 수와 받은 수신확인 signal의 개수가 같다면
-        write(1,"Server recieved your message\n", 30);
-    else
-    {
-        write(1,"[error] There was error while sending your message\n", 52);
-    }
+	if (kill(targetPID, signo) == -1)
+	{
+		if (errno == EPERM)
+		{
+			write(1, "[error] kill() : Not enough permission!\n", 41);
+		}
+		else if (errno == ESRCH)
+		{
+			write(1, "[error] kill() : Cannot find the process of pid [", 50);
+			ft_putnbr_fd(targetPID, 1);
+			write(1, "]\n", 3);
+		}
+		else if (errno == EINVAL)
+		{	
+			write(1, "[error] kill() : Invalid signo", 31);
+			ft_putnbr_fd(signo, 1);
+			write(1, "\n", 1);
+		}
+		else
+			write(1, "[error] kill()\n", 16);
+		return (-1);
+	}
+	return (0);
 }
 
-char    *process_whitespace(char *msg)
+static void	ack(int signo)
 {
-    int i = 0;
-    int slash = 0, index = 0;
-    char *result = (char *)malloc(sizeof(char)*ft_strlen(msg));
-
-    if (result == 0)
-        return (NULL);
-    while (msg[i])
-    {
-        if (msg[i] == '\'')
-            slash = 1;
-        if (i > 0 && slash == 1)
-        {
-            slash = 0;
-            if (msg[i] == 't')
-                result[index++] = '\t';
-            else if (msg[i] == 'v')
-                result[index++] = '\v';
-            else if (msg[i] == 'r')
-                result[index++] = '\r';
-            else if (msg[i] == 'f')
-                result[index++] = '\f';
-            else if (msg[i] == 'n')
-                result[index++] = '\n';
-            else if (msg[i] == '\'')
-            {
-                result[index++] = '\'';
-                slash = 1;
-            }
-            else
-            {
-                result[index++] = '\'';
-                result[index++] = msg[i];
-            }
-        }
-        result[index++] = msg[i];
-        i++;
-    } 
-    result[index] = '\0';
-    return (result);
+	(void)signo;
+	g_sig_ack++;
 }
 
-void    send_msg(int pid, char *msg, int *sig_total)
+static void	recieve_check(int sig_total)
 {
-    int num, len, bit;
-
-    len = ft_strlen(msg);
-    for (int i = 0; i < len; i++)
-    {
-        num = (int)msg[i];
-        for (int j = 7; j >= 0; --j) // 10진수 숫자를 2진수(8비트)로 바꾸기
-        {
-            bit = 0;
-            bit = num >> j & 1;
-            if (bit == 0)
-                kill(pid, SIGUSR1);
-            else
-                kill(pid, SIGUSR2);
-            usleep(30); 
-            /* 좀더 시그널을 빠르게 만들려면 usleep()의 매개변수를 줄이면 되는데, 
-            너무 줄이면 시그널이 겹쳐져서 다 안보내짐. 30이 마지노 같음 */
-        }
-        (*sig_total)++; // 한 글자 보낼 때마다 증가
-    }
+	if (g_sig_ack != 0 && sig_total != 0 && (g_sig_ack == sig_total))
+		write(1, "SUCCESS : Server recieved your message\n", 40);
+	else
+	{
+		write(1, "[error] There was error while sending your message\n", 52);
+	}
 }
 
-int     main(int argc, char **argv)
+static void	send_msg(int pid, char *msg, int len, int *sig_total)
 {
-    int sig_total = 0;
-    char *msg;
-    struct sigaction sa;
+	int	bit;
+	int	i;
+	int	j;
 
-    if (argc != 3)
-    {
-        write(1, "[error] Wrong input formats\n", 29);
-        return (1);
-    }
-    //수신 확인 시스템
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
-    sa.sa_handler = ack;
-    sigaction(SIGUSR1, &sa, (struct sigaction *)NULL); 
-    // sigusr1, sigusr2만 허용 시그널이므로 sigusr1을 받아 수신 확인함.
-    msg = process_whitespace(argv[2]); // 인자로 받은 문자열에서 텍스트로 되어있는 공백문자를 공백문자로 바꿈.
-    send_msg(ft_atoi(argv[1]), msg, &sig_total);
-    recieve_check(sig_total);
-    return (0);
+	i = 0;
+	while (i < len)
+	{
+		j = 7;
+		while (j >= 0)
+		{
+			bit = (int)msg[i] >> j & 1;
+			if (bit == 0)
+			{
+				if (kill_(pid, SIGUSR1) == -1)
+					return ;
+			}
+			else
+				if (kill_(pid, SIGUSR2) == -1)
+					return ;
+			usleep(30);
+			j--;
+		}
+		(*sig_total)++;
+		i++;
+	}
 }
-// 실행시 인자로 pid, 보낼 문자열 차례로 넣어줌
+
+int	main(int argc, char **argv)
+{
+	struct sigaction	sa;
+	int					sig_total;
+	char				*msg;
+
+	sig_total = 0;
+	g_sig_ack = 0;
+	if (argc != 3 || ft_is_numstr(argv[1]) == 0)
+	{
+		write(1, "[error] Wrong input formats\n", 29);
+		return (1);
+	}
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_handler = ack;
+	if (sigaction(SIGUSR1, &sa, (struct sigaction *) NULL) == -1)
+	{
+		write(1, "[error] sigaction() : Failed to handle SIGUSR1 signal\n", 55);
+		return (0);
+	}
+	msg = ft_convert_textws(argv[2]);
+	send_msg(ft_atoi(argv[1]), msg, ft_strlen(msg), &sig_total);
+	recieve_check(sig_total);
+	free(msg);
+	return (0);
+}
