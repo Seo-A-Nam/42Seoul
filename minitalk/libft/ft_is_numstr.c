@@ -6,20 +6,20 @@
 /*   By: namseoa <namseoa@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 12:22:33 by namseoa           #+#    #+#             */
-/*   Updated: 2022/01/05 12:23:36 by namseoa          ###   ########.fr       */
+/*   Updated: 2022/01/05 13:32:32 by namseoa          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-int	ft_is_numstr(char *str)
+int	ft_is_numstr(const char *str)
 {
 	int	i;
 
 	i = 0;
 	while (str[i])
 	{
-		if (str[i] <= '0' || str[i] >= '9')
+		if (!(str[i] >= '0' && str[i] <= '9'))
 			return (0);
 		i++;
 	}
