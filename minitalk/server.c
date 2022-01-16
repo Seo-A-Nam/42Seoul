@@ -6,7 +6,7 @@
 /*   By: namseoa <namseoa@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/04 22:11:40 by namseoa           #+#    #+#             */
-/*   Updated: 2022/01/05 12:30:41 by namseoa          ###   ########.fr       */
+/*   Updated: 2022/01/16 16:12:33 by namseoa          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ int	main(void)
 	struct sigaction	sa;
 
 	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;
+	sa.sa_flags = SA_SIGINFO;
 	sa.sa_sigaction = get_msg;
 	if (sigaction(SIGUSR1, &sa, (struct sigaction *) NULL) == -1)
 	{

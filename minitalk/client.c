@@ -6,7 +6,7 @@
 /*   By: namseoa <namseoa@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/05 11:02:47 by namseoa           #+#    #+#             */
-/*   Updated: 2022/01/05 13:40:03 by namseoa          ###   ########.fr       */
+/*   Updated: 2022/01/16 16:12:19 by namseoa          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ static void	send_msg(int pid, char *msg, int len, int *sig_total)
 			else
 				if (kill_(pid, SIGUSR2) == -1)
 					return ;
-			usleep(30);
+			usleep(50);
 			j--;
 		}
 		(*sig_total)++;

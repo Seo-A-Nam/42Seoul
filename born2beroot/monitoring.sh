@@ -8,7 +8,6 @@ printf "#CPU physical : "
  nproc --all
  # Check the number of physical CPU (물리적 cpu의 개수 확인)
 
-
 printf "#vCPU : "
  cat /proc/cpuinfo | grep processor | wc -l
  # Check the number of physical CPU allocated on this Virtual machine (가상머신에 할당된 물리적 CPU의 개수 확인)
@@ -41,7 +40,7 @@ printf " ESTABLISHED\n"
  # Check TCP connection (TCP 연결을 확인)
 printf "#User log: "
  who | wc -l
- # Check the number of users who is currently loggined in (현재 로그인 중인 이용자의 수를 확인)
+ # Check the number of users who is currently logged in (현재 로그인 중인 이용자의 수를 확인)
 printf "#Network: IP"
  /sbin/ifconfig | grep broadcast | sed 's/inet//g' | sed 's/netmask.*//g' | sed 's/ //g' | tr -d '\n'
 
