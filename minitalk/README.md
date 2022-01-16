@@ -1,23 +1,88 @@
-## 과제 진행 시 주의사항
+# My blog
+블로그(노션) 링크. 자세하게 설명되어 있음 (코드에 주석 포함)
+
+https://educated-tarsier-f16.notion.site/Minitalk-9edb5a628a9b4ec0990e114243654ebf
+
+# Progress
+<img width="200" alt="스크린샷 2022-01-16 오후 8 32 16" src="https://user-images.githubusercontent.com/65381957/149658099-32695a54-595a-411b-89eb-042e128eea0b.png">
+
+Done (+ with bonus score)
+
++) i have plans to add comments on the code later.
+
+# Overview
+> Unix 시그널을 사용한 ipc 통신 시스템
+
+>ipc communication program (small data exchange program using UNIX-signals)
+
++) bonus part - displaying unicode and implementing reception check system.
+
+### <b>example (실행 예시) : </b>
+* Client gets 3 arguments. (executable file itself, server pid, message to send).
+    * After sending message, it displays the check meesage verifying if the prgress was successful or not.
+* Server displays the recieved message. and send signals to client to confirm reception (reception check system)
+
+
+<img width="1137" alt="스크린샷 2022-01-16 오후 8 57 27" src="https://user-images.githubusercontent.com/65381957/149658970-b8bbf54c-3b82-4ea5-badd-4187469bebcc.png">
+
+(korean ver. 한국어 버전 설명)
+* 클라이언트는 3개의 인자를 받는다 (실행파일 자신, 메시지를 보낼 서버의 pid, 보낼 메시지)
+    * 메시지를 전송한 후에, 메시지 전송이 성공했는지 실패했는 지 알려주는 수신체크 메시지를 출력한다.
+* 서버는 수신된 메시지를 화면에 출력한다. 그리고 수신 확인을 위해 클라이언트 측에 시그널을 보내준다.
+
+# How to use
+
+    $ git clone (github repo url)
+    $ cd minitalk
+    $ make
+* Next step : from now on, you'll need 2 terminal window to execute either client or server.
+    * <b>./server</b>
+    * <b>./client (server pid) (message to send) </b>
+
+
+# Feedbacks
+<details>
+<summary><p style="font-size:120%"><b>peer evaluation (in korean) </p></summary>
+<div markdown="1">
+1. 
+<img width="685" alt="스크린샷 2022-01-16 오후 8 34 46" src="https://user-images.githubusercontent.com/65381957/149658176-be8fcc8a-701a-4935-9528-5037e278884e.png">
+2. 
+<img width="688" alt="스크린샷 2022-01-16 오후 8 35 50" src="https://user-images.githubusercontent.com/65381957/149658200-c84c310c-37a7-44d7-b1f8-cae309a990d2.png">
+3.
+<img width="685" alt="스크린샷 2022-01-16 오후 8 38 02" src="https://user-images.githubusercontent.com/65381957/149658265-b75f5154-1c74-43ac-9a27-727ede3bc59e.png">
+</b>
+</div>
+</details>
+
+
+# ETC
+## <U>The reason why i use sigaction() instead of signal</U>()
+-> to get client pid from server. (using siginfo_t type struct)
+
+* <b> signal()이 아닌 sigaction()을 쓰기로 한 이유 </b>
+
+    보너스 파트의 수신 확인 시스템을 만들고 싶었는데, 그러려면 client 측에서 내게 시그널을 보낸 server의 pid에 시그널을 보내야한다. 그러나 signal() 함수를 통해서는 서버의 pid 정보같은 것을 얻을 수 없다. 반면에 sigaction 함수에서는 구조체로 여러 정보를 담아서 전달하기 때문에 그것으로부터 서버의 pid를 얻는 것이 가능하다
+<br>
+
+
+## things to check when working on this project
+<details>
+<summary>과제 진행 시 주의사항</summary>
+<div markdown="1">
 1. signal 관련 함수의 리턴값을 받아서 그부분까지 에러처리
-2. ./client (pid) "메시지" 이렇게 줬을 때, 메시지 인자 안에 공백문자가 텍스트형식으로 들어가있는걸 다시 공백문자로 바꿔주기. (꼭 해야하는 게 맞나? - 본인이 하고 싶다면 해라)
+2. ./client (pid) "메시지" 이렇게 줬을 때, 메시지 인자 안에 공백문자가 텍스트형식으로 들어가있는걸 다시 공백문자로 바꿔주기. (꼭 해야하는 것은 아님. 본인 희망사항에 따라 구현)
 3. main 인자로 실행파일 포함 인자 3개가 안들어오면 에러처리
 4. 인자로 들어온 pid에 숫자가 아닌 문자가 포함되있으면 에러처리
 5. kill() 리턴값 에러처리 (더 자세하게 하려면 함수 하나로 빼서 errno에 따른 예외처리도 가능)
-6. sigaction 또는 signal 함수에서 시그널 핸들러가 등록되지 않았을 시 0 반환하므로 그것도 에러처리.
+6. sigaction 함수에서 시그널 핸들러 등록에 실패할 시 -1 반환하므로 그것도 에러처리.
 7. 시그널 전송 시간이 너무 오래걸리지는 않는 지 에러처리.
-(참고) 시그널 전송 시간 재는 법)
+(참고) 시그널 전송 시간 재는 법 👉 
 time ./client <서버pid> <문자열> 하시면 송신완료 후 걸린 시간이 밑에 나온다.
-<!--(참고) 시그널 전송 시간 재는 법
-다음 코드를 client.c의 메인함수에 넣어준다 👉
-int start = clock(); // 시그널 보내기 전
-int end = clock(); // 시그널 보낸 후
-printf("글자 수 %d개인 메시지 보내는 데 걸린 시간 : %.3lf 밀리초, %.3lf 초\n", (int)ft_strlen(argv[2]), (double)end-start, (end-start)/(double)1000);-->
+</div>
+</details>
+<br>
 
-## 현재 진행현황
-보너스 파일 따로 만들어야하는 지 아닌지만 알아보고, 노션에 동료평가용 설명 자료만 만들어놓으면 당장 평가받을 수 있음.
-
-## 과거 진행 기록 (history of progress)
+## history of progress
 <details>
 <summary>1. mendatory part 마무리 + 보너스파트에 unicode 까지 나타나게 함.</summary>
 <div markdown="1">
@@ -29,7 +94,6 @@ signal 함수의 핸들러 프로토타입은 void 핸들러(int signo)로 정�
 여기서 어떻게 siginfo_t를 얻어 si_pid로 보낸 상대의 pid를 얻는 지도...
 </div>
 </details>
-
 <details>
 <summary>2. 1번 현황에서 그대로 signal() 다 sigaction()으로. [보너스] 수신확인 시스템 구현. </summary>
 <img width="1296" alt="스크린샷 2022-01-04 오후 2 22 46" src="https://user-images.githubusercontent.com/65381957/148013113-2b614fbd-3fd3-4603-b2bf-cd83552511ea.png">
@@ -41,8 +105,6 @@ signal 함수의 핸들러 프로토타입은 void 핸들러(int signo)로 정�
 5. makefile 못만듬
 </div>
 </details>
-<br>
-
 <details>
 <summary>3. 전역변수 줄이고 makefile 만듬, client 인자 개수 에러 메시지 추가</summary>
 
@@ -53,22 +115,20 @@ signal 함수의 핸들러 프로토타입은 void 핸들러(int signo)로 정�
 4. libft 폴더에서 필요한 함수만 추림.
 </div>
 </details>
-<br>
-
 <details>
 <summary>4. 노미넷에 맞게 다 고치고 예외처리 추가</summary>
 
-1. 노미넷 다 고침
-2. 공백문자열 바꿔주는 함수 다 만듬. (여러 번 검토함)
+1. 노미넷에 맞게 다 고침 (노미넷 = 42코드 문법 규정)
+2. 공백문자열 바꿔주는 함수 다 만듬. (여러 번 테스트함)
 3. 한글 주석 달아서 노션에 백업함.
 </details>
 <br>
 
-## signal()이 아닌 sigaction()을 쓰기로 한 이유
-보너스 파트의 수신 확인 시스템을 만들고 싶었는데, 그러려면 client 측에서 내게 시그널을 보낸 server의 pid에 시그널을 보내야한다. 그러나 signal() 함수를 통해서는 서버의 pid 정보같은 것을 얻을 수 없다. 반면에 sigaction 함수에서는 구조체로 여러 정보를 담아서 전달하기 때문에 그것으로부터 서버의 pid를 얻는 것이 가능하다
-<br>
+## References
+</details>
+<details>
+<summary>참고한 자료 링크</summary>
 
-## 참고한 자료
 * char과 unsigned char의 비교 : https://m.blog.naver.com/PostView.naver?isHttpsRedirect=true&blogId=tipsware&logNo=221877901901
 
 * 10진수를 2진수로 바꾸는 법(비트연산) : https://coding-factory.tistory.com/655
@@ -78,3 +138,6 @@ signal 함수의 핸들러 프로토타입은 void 핸들러(int signo)로 정�
 * printf가 asyc signal safe가 아닌 이유 : https://unix.stackexchange.com/questions/609210/why-printf-is-not-asyc-signal-safe-function
 
 * sigaction() 함수의 활용 : https://m.blog.naver.com/PostView.naver?isHttpsRedirect=true&blogId=skssim&logNo=121271980
+
+* 42 minitalk 블로그 : https://bingu.tistory.com/5
+</details>
