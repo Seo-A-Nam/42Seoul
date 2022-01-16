@@ -42,14 +42,18 @@ Done (+ with bonus score)
 
 # Feedbacks
 <details>
-<summary><p style="font-size:120%"><b>peer evaluation (in korean) </p></summary>
+<summary><p style="font-size:120%"><b> 3 peer evaluation (in korean) </p></summary>
 <div markdown="1">
+
 1. 
 <img width="685" alt="스크린샷 2022-01-16 오후 8 34 46" src="https://user-images.githubusercontent.com/65381957/149658176-be8fcc8a-701a-4935-9528-5037e278884e.png">
+
 2. 
 <img width="688" alt="스크린샷 2022-01-16 오후 8 35 50" src="https://user-images.githubusercontent.com/65381957/149658200-c84c310c-37a7-44d7-b1f8-cae309a990d2.png">
-3.
+
+3. 
 <img width="685" alt="스크린샷 2022-01-16 오후 8 38 02" src="https://user-images.githubusercontent.com/65381957/149658265-b75f5154-1c74-43ac-9a27-727ede3bc59e.png">
+
 </b>
 </div>
 </details>
